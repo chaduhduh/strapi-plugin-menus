@@ -2,6 +2,8 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { Layout } from '@strapi/design-system';
+import { CheckPagePermissions } from '@strapi/helper-plugin';
+import pluginPermissions from '../../permissions';
 
 import { pluginId } from '../../utils';
 import EditView from '../EditView';
@@ -18,6 +20,7 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
+   <CheckPagePermissions permissions={pluginPermissions.main}>
     <QueryClientProvider client={queryClient}>
       <Layout>
         <Switch>
@@ -29,6 +32,7 @@ const App = () => {
         </Switch>
       </Layout>
     </QueryClientProvider>
+   </CheckPagePermissions>
   );
 };
 

@@ -1,6 +1,6 @@
 'use strict';
 
-const { prop, isEmpty, uniq } = require('lodash/fp');
+const { prop, isEmpty, uniq, flow } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
@@ -9,7 +9,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constan
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
 const { isListable } = require('../utils'); // CUSTOM MOD [3].
 
-const getService = name => strapi.plugin( 'content-manager' ).service( name ); // CUSTOM MOD [4].
+const getService = (name) => strapi.plugin('content-manager').service(name); // CUSTOM MOD [4].
 
 const addFiltersClause = (params, filtersClause) => {
   params.filters = params.filters || {};
@@ -20,9 +20,41 @@ const addFiltersClause = (params, filtersClause) => {
   }
 };
 
+// CUSTOM MOD [5].
+const sanitizeMainField = (model, mainField) => {
+  // CUSTOM MOD [5].
+  // const permissionChecker = getService('permission-checker').create({
+  //   userAbility,
+  //   model: model.uid,
+  // });
+
+  if (!isListable(model, mainField)) {
+    return 'id';
+  }
+
+  // CUSTOM MOD [5].
+  // if (permissionChecker.cannot.read(null, mainField)) {
+  //   // Allow reading role name if user can read the user model
+  //   if (model.uid === 'plugin::users-permissions.role') {
+  //     const userPermissionChecker = getService('permission-checker').create({
+  //       userAbility,
+  //       model: 'plugin::users-permissions.user',
+  //     });
+  //
+  //     if (userPermissionChecker.can.read()) {
+  //       return 'name';
+  //     }
+  //   }
+  //
+  //   return 'id';
+  // }
+
+  return mainField;
+};
+
 module.exports = {
   async findAvailable(ctx) {
-    const { userAbility } = ctx.state;
+    // const { userAbility } = ctx.state; // CUSTOM MOD [5].
     const { model, targetField } = ctx.params;
 
     await validateFindAvailable(ctx.request.query);
@@ -85,21 +117,15 @@ module.exports = {
 
     const targetedModel = strapi.getModel(attribute.target);
 
-    // CUSTOM MOD [5].
-    // const permissionChecker = getService('permission-checker').create({
-    //   userAbility,
-    //   model: attribute.target,
-    // });
-
     const modelConfig = isComponent
       ? await getService('components').findConfiguration(modelSchema)
       : await getService('content-types').findConfiguration(modelSchema);
 
-    const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-
-    if (!isListable(targetedModel, mainField)) { // CUSTOM MOD [5].
-      mainField = 'id';
-    }
+    const mainField = flow(
+      prop(`metadatas.${targetField}.edit.mainField`),
+      (mainField) => mainField || 'id',
+      (mainField) => sanitizeMainField(targetedModel, mainField) // CUSTOM MOD [5].
+    )(modelConfig);
 
     const fieldsToSelect = uniq(['id', mainField]);
     if (hasDraftAndPublish(targetedModel)) {
@@ -149,7 +175,7 @@ module.exports = {
   },
 
   async findExisting(ctx) {
-    const { userAbility } = ctx.state;
+    // const { userAbility } = ctx.state; // CUSTOM MOD [5].
     const { model, id, targetField } = ctx.params;
 
     await validateFindExisting(ctx.request.query);
@@ -206,16 +232,11 @@ module.exports = {
       ? await getService('components').findConfiguration(modelSchema)
       : await getService('content-types').findConfiguration(modelSchema);
 
-    // CUSTOM MOD [5].
-    // const permissionChecker = getService('permission-checker').create({
-    //   userAbility,
-    //   model: attribute.target,
-    // });
-
-    const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-    if (!isListable(targetedModel, mainField)) { // CUSTOM MOD [5].
-      mainField = 'id';
-    }
+    const mainField = flow(
+      prop(`metadatas.${targetField}.edit.mainField`),
+      (mainField) => mainField || 'id',
+      (mainField) => sanitizeMainField(targetedModel, mainField) // CUSTOM MOD [5].
+    )(modelConfig);
 
     const fieldsToSelect = uniq(['id', mainField]);
     if (hasDraftAndPublish(targetedModel)) {

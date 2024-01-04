@@ -26,9 +26,9 @@ import {
 
 export const RelationInputDataManager = ({
   error,
-  entityId,
-  componentId,
-  isComponentRelation,
+  // entityId, // CUSTOM MOD [9].
+  // componentId, // CUSTOM MOD [9].
+  // isComponentRelation, // CUSTOM MOD [9].
   editable,
   description,
   intlLabel,
@@ -63,8 +63,8 @@ export const RelationInputDataManager = ({
 
   // const initialDataPath = getInitialDataPathUsingTempKeys(initialData, modifiedData)(name); // CUSTOM MOD [11].
 
-  const relationsFromInitialData = getRelationValue(initialData, name, []); // CUSTOM MOD [7].
-  const relationsFromModifiedData = getRelationValue(modifiedData, name, []); // CUSTOM MOD [7].
+  const relationsFromInitialData = getRelationValue(initialData, name); // CUSTOM MOD [7].
+  const relationsFromModifiedData = getRelationValue(modifiedData, name); // CUSTOM MOD [7].
 
   const currentLastPage = Math.ceil(relationsFromInitialData.length / RELATIONS_TO_DISPLAY);
 
@@ -74,10 +74,10 @@ export const RelationInputDataManager = ({
   const relationId = itemId ?? initialData?.id ?? ''; // CUSTOM MOD [7].
   const slug = itemId ? UID_MENU_ITEM : UID_MENU; // CUSTOM MOD [6].
   const isCreatingEntry = isCreatingMenu || typeof itemId === 'string'; // CUSTOM MOD [9].
-
   const cacheKey = `${slug}-${fieldName}-${relationId}`; // CUSTOM MOD [7].
+
   const { relations, search, searchFor } = useRelation(cacheKey, {
-    hasLoaded: has( initialData, name ), // CUSTOM MOD [11].
+    hasLoaded: has(initialData, name), // CUSTOM MOD [11].
     relation: {
       enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
@@ -90,8 +90,7 @@ export const RelationInputDataManager = ({
         relationLoad({
           target: {
             // initialDataPath: ['initialData', ...initialDataPath], // CUSTOM MOD [11].
-            // modifiedDataPath: ['modifiedData', ...nameSplit], // CUSTOM MOD [11].
-            name,
+            modifiedDataPath: ['modifiedData', ...nameSplit],
             value,
           },
         });
@@ -390,21 +389,21 @@ export const RelationInputDataManager = ({
 };
 
 RelationInputDataManager.defaultProps = {
-  componentId: undefined,
-  entityId: undefined,
+  // componentId: undefined, // CUSTOM MOD [9].
+  // entityId: undefined, // CUSTOM MOD [9].
   editable: true,
   error: undefined,
   description: '',
   labelAction: null,
-  isComponentRelation: false,
+  // isComponentRelation: false, // CUSTOM MOD [9].
   isFieldAllowed: true,
   placeholder: null,
   required: false,
 };
 
 RelationInputDataManager.propTypes = {
-  componentId: PropTypes.number,
-  entityId: PropTypes.number,
+  // componentId: PropTypes.number, // CUSTOM MOD [9].
+  // entityId: PropTypes.number, // CUSTOM MOD [9].
   editable: PropTypes.bool,
   error: PropTypes.string,
   description: PropTypes.string,
@@ -416,7 +415,7 @@ RelationInputDataManager.propTypes = {
   labelAction: PropTypes.element,
   // isCloningEntry: PropTypes.bool.isRequired, // CUSTOM MOD [9].
   // isCreatingEntry: PropTypes.bool.isRequired, // CUSTOM MOD [9].
-  isComponentRelation: PropTypes.bool,
+  // isComponentRelation: PropTypes.bool, // CUSTOM MOD [9].
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
   mainField: PropTypes.shape({

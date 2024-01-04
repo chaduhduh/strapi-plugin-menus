@@ -72,11 +72,12 @@ function useSelect({
     componentId = get(modifiedData, fieldNameKeys.slice(0, -1))?.id;
   }
 
-  const isItemType = name.indexOf( 'items' ) === 0; // CUSTOM MOD [7].
+  const isItemType = name.indexOf('items') === 0; // CUSTOM MOD [7].
   let itemId; // CUSTOM MOD [7].
 
-  if (isItemType) { // CUSTOM MOD [7].
-    itemId = get( modifiedData, `${fieldNameKeys.at( 0 )}.id` );
+  // CUSTOM MOD [7].
+  if (isItemType) {
+    itemId = get(modifiedData, `${fieldNameKeys.at(0)}.id`);
   }
 
   const entityId = origin || modifiedData.id;
@@ -107,7 +108,19 @@ function useSelect({
     }
 
     return `/menus/relations/${slug}/${entityId}/${name.split('.').at(-1)}`;
-  }, [isCreatingEntry, origin, componentUid, slug, entityId, name, componentId, fieldNameKeys]);
+    // CUSTOM MOD [7].
+  }, [
+    isCreatingEntry,
+    isItemType,
+    itemId,
+    origin,
+    componentUid,
+    slug,
+    entityId,
+    name,
+    componentId,
+    fieldNameKeys,
+  ]);
 
   // /content-manager/relations/[model]/[field-name]
   const relationSearchEndpoint = useMemo(() => {

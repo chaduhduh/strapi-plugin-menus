@@ -12,6 +12,7 @@ import {
   VisuallyHidden,
   Combobox,
 } from '@strapi/design-system';
+import { useFocusInputField } from '@strapi/helper-plugin';
 import { Cross, Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { FixedSizeList as List } from 'react-window';
@@ -47,6 +48,10 @@ export const DisconnectButton = styled.button`
   }
 `;
 
+const ComboboxWrapper = styled(Box)`
+  align-self: flex-start;
+`;
+
 const RelationInput = ({
   canReorder,
   description,
@@ -78,13 +83,15 @@ const RelationInput = ({
   required,
   relations: paginatedRelations,
   searchResults,
-  size,
+  // size, // CUSTOM MOD [9].
 }) => {
   const [textValue, setTextValue] = useState('');
   const [overflow, setOverflow] = useState('');
 
   const listRef = useRef();
   const outerListRef = useRef();
+
+  const fieldRef = useFocusInputField(name);
 
   const { data } = searchResults;
 
@@ -189,72 +196,84 @@ const RelationInput = ({
       updatedRelationsWith.current === 'onChange' &&
       relations.length !== previewRelationsLength
     ) {
-      listRef.current.scrollToItem(relations.length, 'end');
+      listRef.current?.scrollToItem(relations.length, 'end'); // CUSTOM MOD [15].
       updatedRelationsWith.current = undefined;
     } else if (
       updatedRelationsWith.current === 'loadMore' &&
       relations.length !== previewRelationsLength
     ) {
-      listRef.current.scrollToItem(0, 'start');
+      listRef.current?.scrollToItem(0, 'start'); // CUSTOM MOD [15].
       updatedRelationsWith.current = undefined;
     }
   }, [previewRelationsLength, relations]);
 
   const ariaDescriptionId = `${name}-item-instructions`;
-  const flexBasis = '100%'; // CUSTOM MOD [13].
 
   return (
-    <Flex gap={3} justifyContent="space-between" alignItems="end" wrap="wrap">
-      <Flex direction="column" alignItems="stretch" basis={flexBasis} gap={2}>
-        <Combobox
-          autocomplete="list"
-          error={error}
-          name={name}
-          hint={description}
-          id={id}
-          required={required}
-          label={label}
-          labelAction={labelAction}
-          disabled={disabled}
-          placeholder={placeholder}
-          hasMoreItems={searchResults.hasNextPage}
-          loading={searchResults.isLoading}
-          onOpenChange={handleMenuOpen}
-          noOptionsMessage={() => noRelationsMessage}
-          loadingMessage={loadingMessage}
-          onLoadMore={() => {
-            onSearchNextPage();
-          }}
-          textValue={textValue}
-          onChange={(relationId) => {
-            if (!relationId) {
-              return;
-            }
-            onRelationConnect(options.find((opt) => opt.id === relationId));
-            updatedRelationsWith.current = 'onChange';
-          }}
-          onTextValueChange={(text) => {
-            setTextValue(text);
-          }}
-          onInputChange={(event) => {
-            onSearch(event.currentTarget.value);
-          }}
-        >
-          {options.map((opt) => {
-            return <Option key={opt.id} {...opt} />;
-          })}
-        </Combobox>
+    <Flex
+      direction="column"
+      gap={3}
+      justifyContent="space-between"
+      alignItems="stretch"
+      wrap="wrap"
+    >
+      <Flex direction="row" alignItems="end" justifyContent="end" gap={2} width="100%">
+        {/* CUSTOM MOD [13]. */}
+        <ComboboxWrapper marginRight="auto" maxWidth="100%" width="100%">
+          <Combobox
+            ref={fieldRef}
+            autocomplete="list"
+            error={error}
+            name={name}
+            hint={description}
+            id={id}
+            required={required}
+            label={label}
+            labelAction={labelAction}
+            disabled={disabled}
+            placeholder={placeholder}
+            hasMoreItems={searchResults.hasNextPage}
+            loading={searchResults.isLoading}
+            onOpenChange={handleMenuOpen}
+            noOptionsMessage={() => noRelationsMessage}
+            loadingMessage={loadingMessage}
+            onLoadMore={() => {
+              onSearchNextPage();
+            }}
+            textValue={textValue}
+            onChange={(relationId) => {
+              if (!relationId) {
+                return;
+              }
+              onRelationConnect(options.find((opt) => opt.id === relationId));
+              updatedRelationsWith.current = 'onChange';
+            }}
+            onTextValueChange={(text) => {
+              setTextValue(text);
+            }}
+            onInputChange={(event) => {
+              onSearch(event.currentTarget.value);
+            }}
+          >
+            {options.map((opt) => {
+              return <Option key={opt.id} {...opt} />;
+            })}
+          </Combobox>
+        </ComboboxWrapper>
         {shouldDisplayLoadMoreButton && (
           <TextButton
             disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
             onClick={handleLoadMore}
             loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
             startIcon={<Refresh />}
+            // prevent the label from line-wrapping
+            shrink={0}
           >
             {labelLoadMore}
           </TextButton>
         )}
       </Flex>
+
       {relations.length > 0 && (
         <RelationList overflow={overflow}>
           <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>
@@ -369,7 +388,7 @@ RelationInput.propTypes = {
   }).isRequired,
   required: PropTypes.bool,
   searchResults: SearchResults,
-  size: PropTypes.number.isRequired,
+  // size: PropTypes.number.isRequired, // CUSTOM MOD [9].
   relations: RelationsResult,
 };
 

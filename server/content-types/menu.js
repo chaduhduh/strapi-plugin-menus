@@ -4,6 +4,7 @@ module.exports = {
   kind: 'collectionType',
   collectionName: 'menus',
   info: {
+    name: 'Menu',
     displayName: 'Menu',
     singularName: 'menu',
     pluralName: 'menus',
@@ -35,6 +36,6 @@ module.exports = {
       relation: 'oneToMany',
       target: 'plugin::menus.menu-item',
       mappedBy: 'root_menu',
-    }
+    },
   },
 };

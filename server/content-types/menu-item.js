@@ -4,6 +4,7 @@ module.exports = {
   kind: 'collectionType',
   collectionName: 'menu_items',
   info: {
+    name: 'MenuItem',
     displayName: 'Menu Item',
     singularName: 'menu-item',
     pluralName: 'menu-items',
@@ -33,12 +34,7 @@ module.exports = {
     },
     target: {
       type: 'enumeration',
-      enum: [
-        '_blank',
-        '_parent',
-        '_self',
-        '_top',
-      ],
+      enum: ['_blank', '_parent', '_self', '_top'],
     },
     root_menu: {
       type: 'relation',

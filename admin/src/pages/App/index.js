@@ -10,29 +10,29 @@ import EditView from '../EditView';
 import IndexView from '../IndexView';
 import NotFound from '../NotFound';
 
-const queryClient = new QueryClient( {
+const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
     },
   },
-} );
+});
 
 const App = () => {
   return (
-    <CheckPagePermissions permissions={pluginPermissions.main}>
-      <QueryClientProvider client={ queryClient }>
-        <Layout>
-          <Switch>
-            <Route path={ `/plugins/${pluginId}` } component={ IndexView } exact />
-            <Route path={ `/plugins/${pluginId}/create` } component={ EditView } exact />
-            <Route path={ `/plugins/${pluginId}/clone/:id` } component={ EditView } exact />
-            <Route path={ `/plugins/${pluginId}/edit/:id` } component={ EditView } exact />
-            <Route path="" component={ NotFound } />
-          </Switch>
-        </Layout>
-      </QueryClientProvider>
-    </CheckPagePermissions>
+   <CheckPagePermissions permissions={pluginPermissions.main}>
+    <QueryClientProvider client={queryClient}>
+      <Layout>
+        <Switch>
+          <Route path={`/plugins/${pluginId}`} component={IndexView} exact />
+          <Route path={`/plugins/${pluginId}/create`} component={EditView} exact />
+          <Route path={`/plugins/${pluginId}/clone/:id`} component={EditView} exact />
+          <Route path={`/plugins/${pluginId}/edit/:id`} component={EditView} exact />
+          <Route path="" component={NotFound} />
+        </Switch>
+      </Layout>
+    </QueryClientProvider>
+   </CheckPagePermissions>
   );
 };
 
